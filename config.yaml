@@ -1,0 +1,156 @@
+# AkameRecon - Configuração Global
+# Arquivo de configuração da ferramenta de reconhecimento
+
+# Configurações gerais
+general:
+  threads: 5  # Reduzido para evitar sobrecarga
+  timeout: 10
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+  output_format: ["json", "csv"]
+  verbose: false  # Modo verboso desativado por padrão
+
+# Configurações do módulo de enumeração de subdomínios
+subdomain_enum:
+  # Fontes passivas (OSINT)
+  use_crt_sh: true
+  use_subfinder: true
+  use_amass: true
+  
+  # Fontes ativas (mais intrusivas)
+  use_bruteforce: true
+  use_amass_active: false  # Desativado por padrão por ser muito demorado
+  use_alterations: true
+  
+  # Caminhos e recursos
+  wordlist_path: "utils/wordlists/mini.txt"  # Usar wordlist reduzida por padrão
+  
+  # Configurações de timeouts
+  crt_sh_timeout: 30
+  subfinder_timeout: 300
+  amass_timeout: 600
+  amass_active_timeout: 1200
+  
+  # Configurações de bruteforce
+  max_bruteforce_workers: 5  # Valor conservador
+  bruteforce_retry: 2
+  bruteforce_timeout: 2
+  
+  # Configurações de alterações
+  max_alterations: 100  # Limitar número de alterações
+  alteration_prefixes: ["dev", "stage", "test", "prod", "api"]
+  alteration_suffixes: ["-dev", "-stage", "-test", "-prod", "-api"]
+  
+  # APIs (adicione suas chaves de API aqui)
+  shodan_api_key: ""
+  security_trails_key: ""
+  virustotal_api_key: ""
+
+# Configurações de DNS
+dns:
+  resolvers:
+    - "8.8.8.8"
+    - "8.8.4.4"
+    - "1.1.1.1"
+    - "1.0.0.1"
+    - "9.9.9.9"
+  concurrent_requests: 5  # Reduzido de 50 para evitar sobrecarga
+  record_types:
+    - "A"
+    - "AAAA"
+    - "CNAME"
+    - "MX"
+    - "NS"
+    - "TXT"
+  timeout: 5
+  use_dig: false  # Desativado por padrão
+  max_dig_timeout: 10
+  try_zone_transfer: false  # Potencialmente intrusivo, desativado por padrão
+  filter_internal_ips: true  # Filtrar IPs internos/privados
+
+# Configurações de escaneamento de portas
+port_scan:
+  default_ports: [21, 22, 23, 25, 53, 80, 81, 443, 8080, 8443]  # Reduzidos para escanear apenas os mais comuns
+  full_scan: false
+  scan_type: "sT"  # sT (TCP connect), sS (SYN scan) - requer root
+  timeout: 5
+  min_rate: 100  # Reduzido para evitar sobrecarga de rede
+  threads: 5  # Reduzido para 5 threads
+  use_naabu: false
+  service_detection: true
+  os_detection: false  # Desativado por padrão pois requer root
+  service_intensity: 5  # Intensidade média de detecção de serviço (0-9)
+  nse_scripts:  # Scripts NSE para detecção de serviços
+    - "banner"
+    - "http-title"
+    - "ssl-cert"
+    - "ssh-auth-methods"
+    - "http-headers"
+    - "http-server-header"
+  additional_args: ""
+  naabu_rate: 100  # Taxa de pacotes para naabu
+  socket_timeout: 1  # Timeout para escaneamento com socket
+
+# Configurações de varredura de serviços web
+web_scan:
+  headers_to_collect:
+    - "Server"
+    - "X-Powered-By"
+    - "X-AspNet-Version"
+    - "X-Frame-Options"
+    - "X-XSS-Protection"
+    - "Content-Security-Policy"
+    - "Strict-Transport-Security"
+    - "X-Content-Type-Options"
+  follow_redirects: true
+  max_redirects: 5
+  screenshot: false
+  timeout: 8
+  threads: 5  # Reduzido para 5 threads
+  tech_detection: true
+  max_workers: 5  # Número máximo de workers para processamento paralelo
+  user_agent_rotation: false  # Se deve alternar entre diferentes user agents
+  whatweb_options:  # Opções para o whatweb
+    - "--no-errors"
+    - "--aggression 1"
+    - "--follow-redirect=never"
+    - "--log-json=-"
+  use_httpx: true  # Se deve usar httpx para verificação inicial
+
+# Configurações de fuzzing e bruteforce
+fuzzing:
+  wordlists:
+    directories: "utils/wordlists/directories.txt"
+    files: "utils/wordlists/files.txt"
+    extensions: ["php", "asp", "aspx", "jsp", "html", "js", "zip", "txt", "sql"]
+  threads: 5  # Reduzido para 5 threads
+  recursion_level: 1
+  timeout: 5
+  follow_redirects: true
+  auto_calibration: true
+
+# Configurações de detecção de WAF
+waf_detection:
+  use_wafw00f: true
+  custom_waf_checks: false
+  timeout: 10
+
+# Configurações de scan de vulnerabilidades
+vuln_scan:
+  use_nuclei: true
+  templates:
+    - "cves"
+    - "vulnerabilities"
+    - "technologies"
+    - "misconfigurations"
+  concurrency: 5  # Reduzido para 5
+  rate_limit: 50  # Reduzido para 50
+  timeout: 10
+
+# Configurações de relatórios
+report:
+  formats: ["json", "txt"]  # Formatos de saída
+  include_screenshots: false  # Se deve incluir screenshots
+  include_raw_data: true  # Se deve incluir dados brutos
+  statistics: true  # Se deve gerar estatísticas
+  group_by_domain: true  # Se deve agrupar resultados por domínio
+  max_json_size: 50  # Tamanho máximo do arquivo JSON em MB 
